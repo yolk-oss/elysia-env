@@ -1,32 +1,37 @@
-# elysia-env
+# @yolk/elysia-env
 
-elysia-env plugin for [Elysia.js](https://elysiajs.com)
+env plugin for [Elysia.js](https://elysiajs.com)
 
 ## Installation
 
 ```bash
-bun add elysia-env
+bun add @yolk/elysia-env
 ```
 
 ## Usage
 
 ```ts
-import { Elysia } from 'elysia';
-import { myPlugin } from 'elysia-env';
+import { Elysia, t } from 'elysia'
+import { env } from '@yolk/elysia-env'
 
 const app = new Elysia()
-  .use(myPlugin())
-  .get('/', (ctx) => {
-    return ctx.getProjectName();
-  })
-  .listen(8080);
+    .use(
+        env({
+            TOKEN: t.String({
+                minLength: 5,
+                error: 'TOKEN is required for a service!',
+            }),
+        }),
+    )
+    .get('/', ({ env }) => env.TOKEN)
+    .listen(8080)
 
-console.log(`Listening on http://${app.server!.hostname}:${app.server!.port}`);
+console.log(`Listening on http://${app.server!.hostname}:${app.server!.port}`)
 ```
 
 Checkout the [examples](./examples) and [tests](./tests) folders on github.
 
-## API
+<!-- ## API
 
 ### Plugin Options
 
@@ -34,15 +39,6 @@ Checkout the [examples](./examples) and [tests](./tests) folders on github.
 | ------ | ----------- |
 | `...`  | ...         |
 
-### `ctx.getProjectName()`
-
-Returns the project name
-
-```js
-const projectName = ctx.getProjectName();
-```
-
 ## License
 
-[...](LICENSE)
-
+[...](LICENSE) -->
