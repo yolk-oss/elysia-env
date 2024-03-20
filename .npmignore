@@ -1,0 +1,9 @@
+.git
+.gitignore
+.env
+
+node_modules
+
+examples
+tests
+CHANGELOG.md
