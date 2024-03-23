@@ -1,5 +1,5 @@
 {
-  "name": "@yolk/elysia-env",
+  "name": "@yolk-oss/elysia-env",
   "description": "env plugin for Elysia.js",
   "version": "1.0.0",
   "repository": {
@@ -20,7 +20,7 @@
   "scripts": {
     "lint": "eslint .",
     "dev": "bun run --watch examples/index.ts",
-    "test": "bun run lint && bun test",
+    "test": "bun run lint && bun test --env-file=.env.test",
     "test:node": "npm install --prefix ./tests/node/cjs/ && npm install --prefix ./tests/node/esm/ && node ./tests/node/cjs/index.js && node ./tests/node/esm/index.js",
     "build": "rimraf dist && tsc --project tsconfig.esm.json && tsc --project tsconfig.cjs.json",
     "release": "bun run build && bun run test && npm run test:node && npm publish --access public"

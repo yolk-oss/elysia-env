@@ -5,7 +5,7 @@ import { describe, expect, it, spyOn } from 'bun:test'
 
 const req = (path: string) => new Request(`http://localhost${path}`)
 
-describe('@yolk/elysia-env', () => {
+describe('@yolk-oss/elysia-env', () => {
     it('should return correct env variable', async () => {
         const app = new Elysia()
             .use(
@@ -19,7 +19,7 @@ describe('@yolk/elysia-env', () => {
         expect(response).toBe('hello!elysia')
     })
 
-    it('should return correct env variables', async () => {
+    it('should return multiple correct env variables', async () => {
         const app = new Elysia()
             .use(
                 env({
@@ -31,7 +31,7 @@ describe('@yolk/elysia-env', () => {
                         }),
                 }),
             )
-            .get('/', ({ env }) => env.API_TOKEN)
+            .get('/', ({ env }) => env)
 
         const response = await app.handle(req('/')).then((res) => res.json())
 
@@ -76,7 +76,7 @@ describe('@yolk/elysia-env', () => {
                     }),
                 }),
             )
-            .get('/', ({ env }) => env.NON_EXISTANT_API_TOKEN)
+            .get('/', ({ env }) => env)
 
         await app.handle(req('/'))
 

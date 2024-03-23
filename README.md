@@ -1,18 +1,18 @@
-# @yolk/elysia-env
+# @yolk-oss/elysia-env
 
 env plugin for [Elysia.js](https://elysiajs.com)
 
 ## Installation
 
 ```bash
-bun add @yolk/elysia-env
+bun add @yolk-oss/elysia-env
 ```
 
 ## Usage
 
 ```ts
 import { Elysia, t } from 'elysia'
-import { env } from '@yolk/elysia-env'
+import { env } from '@yolk-oss/elysia-env'
 
 const app = new Elysia()
     .use(

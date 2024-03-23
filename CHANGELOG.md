@@ -2,4 +2,4 @@
 
 Feature:
 
--   Initial release of `@yolk/elysia-env` package 🎉
+-   Initial release of `@yolk-oss/elysia-env` package 🎉

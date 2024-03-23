@@ -9,11 +9,9 @@ new Elysia()
                 error: 'TOKEN is required for service A!',
             }),
             IS_ENABLED: t.Boolean({ default: false }),
-            PORT: t.Optional(
-                t.Number({
-                    default: 3000,
-                }),
-            ),
+            PORT: t.Number({
+                default: 3000,
+            }),
         }),
     )
     .get('/', ({ env }) => env)
