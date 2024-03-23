@@ -22,24 +22,21 @@ export const env = <TEnv extends TProperties = NonNullable<unknown>>(
             ),
         )
 
-        if (!typeCompiler.Check(preparedVariables)) {
-            console.error(
-                '❌ Invalid environment variables:',
-                [...typeCompiler.Errors(preparedVariables)].reduce(
-                    (errors, e) => {
-                        const path = e.path.substring(1)
-                        return { ...errors, [path]: e.message }
-                    },
-                    {},
-                ),
-            )
-            // TODO: ask user if they want it to stop the process or just show error in console
-            process.exit()
+        if (typeCompiler.Check(preparedVariables)) {
+            // TODO: add success/error callback as params?
+            return {
+                env: typeCompiler.Decode(preparedVariables),
+            }
         }
 
-        // TODO: add success/error callback as params?
+        console.error(
+            '❌ Invalid environment variables:',
+            [...typeCompiler.Errors(preparedVariables)].reduce((errors, e) => {
+                const path = e.path.substring(1)
+                return { ...errors, [path]: e.message }
+            }, {}),
+        )
 
-        return {
-            env: typeCompiler.Decode(preparedVariables),
-        }
+        // TODO: ask user if they want it to stop the process or just show error in console
+        process.exit()
     })

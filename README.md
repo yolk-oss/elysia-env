@@ -24,6 +24,7 @@ const app = new Elysia()
         }),
     )
     .get('/', ({ env }) => env.TOKEN)
+    //                           ^? (property) TOKEN: string
     .listen(8080)
 
 console.log(`Listening on http://${app.server!.hostname}:${app.server!.port}`)
@@ -31,14 +32,6 @@ console.log(`Listening on http://${app.server!.hostname}:${app.server!.port}`)
 
 Checkout the [examples](./examples) and [tests](./tests) folders on github.
 
-<!-- ## API
-
-### Plugin Options
-
-| Option | Description |
-| ------ | ----------- |
-| `...`  | ...         |
-
 ## License
 
-[...](LICENSE) -->
+[MIT](LICENSE)

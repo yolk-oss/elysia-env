@@ -1,17 +1,5 @@
-# 0.0.1 - 12 Sep 2023
+# 1.0.0 - 24 Mar 2024
 
 Feature:
 
-- ...
-
-Improvement:
-
-- ...
-
-Bug Fix:
-
-- ...
-
-Breaking Change:
-
-- ...
+-   Initial release of `@yolk/elysia-env` package 🎉

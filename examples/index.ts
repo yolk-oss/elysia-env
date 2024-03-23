@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { env } from '../src'
 
-const app = new Elysia()
+new Elysia()
     .use(
         env({
             TOKEN: t.String({
