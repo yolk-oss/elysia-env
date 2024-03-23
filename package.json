@@ -27,12 +27,12 @@
   },
   "devDependencies": {
     "@types/bun": "^1.0.10",
-    "@typescript-eslint/eslint-plugin": "^6.18.0",
-    "@typescript-eslint/parser": "^6.18.0",
-    "elysia": "^1.0.0",
-    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
+    "elysia": "^1.0.7",
+    "eslint": "^8.57.0",
     "rimraf": "^5.0.5",
-    "typescript": "^5.0.0"
+    "typescript": "^5.4.3"
   },
   "peerDependencies": {
     "elysia": ">= 1.0.0"
