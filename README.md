@@ -1,5 +1,8 @@
 # @yolk-oss/elysia-env
 
+![NPM License](https://img.shields.io/npm/l/%40yolk-oss%2Felysia-env?style=flat-square)
+![NPM Version](https://img.shields.io/npm/v/%40yolk-oss%2Felysia-env?style=flat-square)
+
 env plugin for [Elysia.js](https://elysiajs.com)
 
 ## Installation
