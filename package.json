@@ -1,13 +1,21 @@
 {
   "name": "@yolk-oss/elysia-env",
   "description": "env plugin for Elysia.js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/yolk-oss/elysia-env"
   },
-  "types": "./src/index.ts",
+  "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
+  "exports": {
+    "bun": "./dist/index.js",
+    "node": "./dist/cjs/index.js",
+    "require": "./dist/cjs/index.js",
+    "import": "./dist/index.js",
+    "default": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
   "bugs": "https://github.com/yolk-oss/elysia-env/issues",
   "homepage": "https://github.com/yolk-oss/elysia-env",
   "keywords": [
@@ -29,22 +37,15 @@
     "release": "bun run build && bun run test && npm run test:node && npm publish --access public"
   },
   "devDependencies": {
-    "@types/bun": "^1.0.10",
-    "@typescript-eslint/eslint-plugin": "^7.3.1",
-    "@typescript-eslint/parser": "^7.3.1",
-    "elysia": "^1.0.7",
+    "@types/bun": "^1.0.11",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "elysia": "^1.0.9",
     "eslint": "^8.57.0",
     "rimraf": "^5.0.5",
     "typescript": "^5.4.3"
   },
   "peerDependencies": {
     "elysia": ">= 1.0.0"
-  },
-  "exports": {
-    "bun": "./dist/index.js",
-    "node": "./dist/cjs/index.js",
-    "require": "./dist/cjs/index.js",
-    "import": "./dist/index.js",
-    "default": "./dist/index.js"
   }
 }

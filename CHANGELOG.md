@@ -1,3 +1,9 @@
+# 1.0.2 - 26 Mar 2024
+
+Improvement:
+
+-   Fix package magic types 🪄
+
 # 1.0.1 - 26 Mar 2024
 
 Improvement:
