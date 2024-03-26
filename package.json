@@ -17,6 +17,9 @@
     "plugin"
   ],
   "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "lint": "eslint .",
     "dev": "bun run --watch examples/index.ts",
