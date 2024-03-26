@@ -1,7 +1,7 @@
 {
   "name": "@yolk-oss/elysia-env",
   "description": "env plugin for Elysia.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/yolk-oss/elysia-env"
