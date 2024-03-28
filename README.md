@@ -1,7 +1,10 @@
 # @yolk-oss/elysia-env
 
-![NPM License](https://img.shields.io/npm/l/%40yolk-oss%2Felysia-env?style=flat-square)
-![NPM Version](https://img.shields.io/npm/v/%40yolk-oss%2Felysia-env?style=flat-square)
+[![elysia][elysia-src]][elysia-href]
+[![npm version][npm-version-src]][npm-version-href]
+[![npm downloads][npm-downloads-src]][npm-downloads-href]
+[![bundle][bundle-src]][bundle-href]
+[![License][license-src]][license-href]
 
 env plugin for [Elysia.js](https://elysiajs.com)
 
@@ -38,3 +41,16 @@ Checkout the [examples](./examples) and [tests](./tests) folders on github.
 ## License
 
 [MIT](LICENSE)
+
+<!-- Badges -->
+
+[elysia-src]: https://img.shields.io/badge/%F0%9F%A6%8A-f6f8fa?style=flat-square&label=elysia&labelColor=f06292
+[elysia-href]: https://elysiajs.com/
+[npm-version-src]: https://img.shields.io/npm/v/@yolk-oss/elysia-env?style=flat-square&labelColor=EFEBE8&color=F4BB29
+[npm-version-href]: https://npmjs.com/package/@yolk-oss/elysia-env
+[npm-downloads-src]: https://img.shields.io/npm/dm/@yolk-oss/elysia-env?style=flat-square&labelColor=EFEBE8&color=F4BB29
+[npm-downloads-href]: https://npmjs.com/package/@yolk-oss/elysia-env
+[bundle-src]: https://img.shields.io/bundlephobia/minzip/@yolk-oss/elysia-env?style=flat-square&labelColor=EFEBE8&color=F4BB29&label=bundlephobia
+[bundle-href]: https://bundlephobia.com/result?p=@yolk-oss/elysia-env
+[license-src]: https://img.shields.io/github/license/yolk-oss/elysia-env.svg?style=flat-square&labelColor=EFEBE8&color=F4BB29
+[license-href]: https://github.com/yolk-oss/elysia-plugin/blob/main/LICENSE
