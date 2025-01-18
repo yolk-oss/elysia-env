@@ -37,6 +37,22 @@ export type EnvOptions = {
      * @default process.env
      */
     envSource?: NodeJS.ProcessEnv
+
+    /**
+     * Defines how to handle validation errors for environment variables.
+     *
+     * - 'exit': Exits process with error code 1 (default)
+     * - 'warn': Logs warning and continues
+     * - 'silent': Continues without logging
+     * - function: Custom error handler
+     *
+     * @default 'exit'
+     */
+    onError?:
+        | 'exit'
+        | 'warn'
+        | 'silent'
+        | ((errors: Record<string, string>) => void)
 }
 
 export const env = <TEnv extends TProperties = NonNullable<unknown>>(
@@ -46,7 +62,7 @@ export const env = <TEnv extends TProperties = NonNullable<unknown>>(
     new Elysia({
         name: '@yolk-oss/elysia-env',
     }).decorate(() => {
-        const { envSource = process.env } = options
+        const { envSource = process.env, onError = 'exit' } = options
 
         const EnvVariableSchema = t.Object(variables)
         const Compiler = TypeCompiler.Compile(EnvVariableSchema)
@@ -58,15 +74,38 @@ export const env = <TEnv extends TProperties = NonNullable<unknown>>(
         )
 
         if (!Compiler.Check(preparedVariables)) {
-            console.error(
-                '❌ Invalid environment variables:',
-                [...Compiler.Errors(preparedVariables)].reduce((errors, e) => {
+            const errors = [...Compiler.Errors(preparedVariables)].reduce(
+                (errors, e) => {
                     const path = e.path.substring(1)
                     return { ...errors, [path]: e.message }
-                }, {}),
+                },
+                {},
             )
 
-            process.exit()
+            if (typeof onError === 'function') {
+                onError(errors)
+            } else {
+                switch (onError) {
+                    case 'silent':
+                        break
+
+                    case 'warn':
+                        console.warn(
+                            '⚠️ Invalid environment variables:',
+                            errors,
+                        )
+
+                        break
+
+                    case 'exit':
+                        console.error(
+                            '❌ Invalid environment variables:',
+                            errors,
+                        )
+
+                        process.exit(1)
+                }
+            }
         }
 
         return {

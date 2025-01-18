@@ -1,11 +1,28 @@
 import { Elysia, t } from 'elysia'
 import { env } from '../src'
-
-import { describe, expect, it, spyOn } from 'bun:test'
+import { describe, expect, it, spyOn, beforeEach, afterEach } from 'bun:test'
 
 const req = (path: string) => new Request(`http://localhost${path}`)
 
 describe('@yolk-oss/elysia-env', () => {
+    let processSpy: any
+    let consoleErrorSpy: any
+    let consoleWarnSpy: any
+
+    beforeEach(() => {
+        processSpy = spyOn(process, 'exit').mockImplementation(
+            () => undefined as never,
+        )
+        consoleErrorSpy = spyOn(console, 'error')
+        consoleWarnSpy = spyOn(console, 'warn')
+    })
+
+    afterEach(() => {
+        processSpy.mockRestore()
+        consoleErrorSpy.mockRestore()
+        consoleWarnSpy.mockRestore()
+    })
+
     describe('core', () => {
         it('should return correct env variable', async () => {
             const app = new Elysia()
@@ -70,11 +87,6 @@ describe('@yolk-oss/elysia-env', () => {
         })
 
         it('should throw error when variable is missing', async () => {
-            const processSpy = spyOn(process, 'exit').mockImplementation(
-                () => undefined as never,
-            )
-            const consoleSpy = spyOn(console, 'error')
-
             const app = new Elysia()
                 .use(
                     env({
@@ -88,9 +100,9 @@ describe('@yolk-oss/elysia-env', () => {
             await app.handle(req('/'))
 
             expect(processSpy).toHaveBeenCalled()
-            expect(consoleSpy).toHaveBeenCalled()
+            expect(consoleErrorSpy).toHaveBeenCalled()
 
-            expect(consoleSpy.mock.lastCall).toEqual([
+            expect(consoleErrorSpy.mock.lastCall).toEqual([
                 '❌ Invalid environment variables:',
                 {
                     NON_EXISTANT_API_TOKEN: 'Expected string',
@@ -99,11 +111,6 @@ describe('@yolk-oss/elysia-env', () => {
         })
 
         it('should throw condition error', async () => {
-            const processSpy = spyOn(process, 'exit').mockImplementation(
-                () => undefined as never,
-            )
-            const consoleSpy = spyOn(console, 'error')
-
             const app = new Elysia()
                 .use(
                     env({
@@ -117,11 +124,34 @@ describe('@yolk-oss/elysia-env', () => {
             await app.handle(req('/'))
 
             expect(processSpy).toHaveBeenCalled()
-            expect(consoleSpy).toHaveBeenCalled()
-            expect(consoleSpy.mock.lastCall).toEqual([
+            expect(consoleErrorSpy).toHaveBeenCalled()
+            expect(consoleErrorSpy.mock.lastCall).toEqual([
                 '❌ Invalid environment variables:',
                 {
                     API_TOKEN: 'Expected string length greater or equal to 42',
+                },
+            ])
+        })
+
+        it('should handle multiple validation errors', async () => {
+            const app = new Elysia()
+                .use(
+                    env({
+                        REQUIRED_VAR_1: t.String(),
+                        REQUIRED_VAR_2: t.String(),
+                    }),
+                )
+                .get('/', ({ env }) => env)
+
+            await app.handle(req('/'))
+
+            expect(processSpy).toHaveBeenCalledWith(1)
+            expect(consoleErrorSpy).toHaveBeenCalled()
+            expect(consoleErrorSpy.mock.lastCall).toEqual([
+                '❌ Invalid environment variables:',
+                {
+                    REQUIRED_VAR_1: 'Expected string',
+                    REQUIRED_VAR_2: 'Expected string',
                 },
             ])
         })
@@ -159,11 +189,6 @@ describe('@yolk-oss/elysia-env', () => {
         })
 
         it('should handle missing variables in custom envSource', async () => {
-            const processSpy = spyOn(process, 'exit').mockImplementation(
-                () => undefined as never,
-            )
-            const consoleSpy = spyOn(console, 'error')
-
             const emptyEnvSource = {}
 
             const app = new Elysia()
@@ -182,8 +207,8 @@ describe('@yolk-oss/elysia-env', () => {
             await app.handle(req('/'))
 
             expect(processSpy).toHaveBeenCalled()
-            expect(consoleSpy).toHaveBeenCalled()
-            expect(consoleSpy.mock.lastCall).toEqual([
+            expect(consoleErrorSpy).toHaveBeenCalled()
+            expect(consoleErrorSpy.mock.lastCall).toEqual([
                 '❌ Invalid environment variables:',
                 {
                     REQUIRED_VAR: 'Expected string',
@@ -223,11 +248,6 @@ describe('@yolk-oss/elysia-env', () => {
         })
 
         it('should validate type constraints with custom envSource', async () => {
-            const processSpy = spyOn(process, 'exit').mockImplementation(
-                () => undefined as never,
-            )
-            const consoleSpy = spyOn(console, 'error')
-
             const invalidEnvSource = {
                 NUMBER_VAR: 'not-a-number',
             }
@@ -248,8 +268,8 @@ describe('@yolk-oss/elysia-env', () => {
             await app.handle(req('/'))
 
             expect(processSpy).toHaveBeenCalled()
-            expect(consoleSpy).toHaveBeenCalled()
-            expect(consoleSpy.mock.lastCall).toEqual([
+            expect(consoleErrorSpy).toHaveBeenCalled()
+            expect(consoleErrorSpy.mock.lastCall).toEqual([
                 '❌ Invalid environment variables:',
                 {
                     NUMBER_VAR: 'Expected number',
@@ -261,7 +281,6 @@ describe('@yolk-oss/elysia-env', () => {
             const originalEnv = process.env
 
             try {
-                // Set up process.env with a test value
                 process.env = {
                     ...process.env,
                     PROCESS_VAR: 'process-value',
@@ -332,9 +351,6 @@ describe('@yolk-oss/elysia-env', () => {
         })
 
         it('should handle async envSource that fails to fetch', async () => {
-            spyOn(process, 'exit').mockImplementation(() => undefined as never)
-            spyOn(console, 'error')
-
             const mockFailedVaultService = async () => {
                 throw new Error('Failed to connect to vault')
             }
@@ -359,6 +375,116 @@ describe('@yolk-oss/elysia-env', () => {
                     'Failed to connect to vault',
                 )
             }
+        })
+    })
+
+    describe('onError', () => {
+        it('should default to "exit" if onError is not specified', async () => {
+            const app = new Elysia()
+                .use(env({ REQUIRED_VAR: t.String() }))
+                .get('/', ({ env }) => env)
+
+            await app.handle(req('/'))
+
+            expect(processSpy).toHaveBeenCalledWith(1)
+            expect(consoleErrorSpy).toHaveBeenCalled()
+            expect(consoleErrorSpy.mock.lastCall).toEqual([
+                '❌ Invalid environment variables:',
+                { REQUIRED_VAR: 'Expected string' },
+            ])
+        })
+
+        it('should exit process on validation error when onError is "exit"', async () => {
+            const app = new Elysia()
+                .use(env({ REQUIRED_VAR: t.String() }, { onError: 'exit' }))
+                .get('/', ({ env }) => env)
+
+            await app.handle(req('/'))
+
+            expect(processSpy).toHaveBeenCalledWith(1)
+            expect(consoleErrorSpy).toHaveBeenCalled()
+            expect(consoleErrorSpy.mock.lastCall).toEqual([
+                '❌ Invalid environment variables:',
+                { REQUIRED_VAR: 'Expected string' },
+            ])
+        })
+
+        it('should log warning on validation error when onError is "warn"', async () => {
+            const app = new Elysia()
+                .use(env({ REQUIRED_VAR: t.String() }, { onError: 'warn' }))
+                .get('/', ({ env }) => env)
+
+            await app.handle(req('/'))
+
+            expect(consoleWarnSpy).toHaveBeenCalled()
+            expect(consoleWarnSpy.mock.lastCall).toEqual([
+                '⚠️ Invalid environment variables:',
+                { REQUIRED_VAR: 'Expected string' },
+            ])
+        })
+
+        it('should not log or exit on validation error when onError is "silent"', async () => {
+            const app = new Elysia()
+                .use(env({ REQUIRED_VAR: t.String() }, { onError: 'silent' }))
+                .get('/', ({ env }) => env)
+
+            await app.handle(req('/'))
+
+            expect(processSpy).not.toHaveBeenCalled()
+            expect(consoleErrorSpy).not.toHaveBeenCalled()
+            expect(consoleWarnSpy).not.toHaveBeenCalled()
+        })
+
+        it('should use custom error handler function for validation errors', async () => {
+            const errorHandlerObj = {
+                handler: (errors: Record<string, string>) => {
+                    console.log('Custom handler:', errors)
+                },
+            }
+
+            const handlerSpy = spyOn(errorHandlerObj, 'handler')
+
+            const app = new Elysia()
+                .use(
+                    env(
+                        { REQUIRED_VAR: t.String() },
+                        { onError: errorHandlerObj.handler },
+                    ),
+                )
+                .get('/', ({ env }) => env)
+
+            await app.handle(req('/'))
+
+            expect(handlerSpy).toHaveBeenCalledWith({
+                REQUIRED_VAR: 'Expected string',
+            })
+        })
+
+        it('should handle multiple validation errors when onError is "warn"', async () => {
+            const consoleSpy = spyOn(console, 'warn')
+
+            const app = new Elysia()
+                .use(
+                    env(
+                        {
+                            REQUIRED_VAR_1: t.String(),
+                            REQUIRED_VAR_2: t.String(),
+                        },
+                        { onError: 'warn' },
+                    ),
+                )
+                .get('/', ({ env }) => env)
+
+            await app.handle(req('/'))
+
+            expect(consoleSpy).toHaveBeenCalled()
+            expect(consoleSpy.mock.lastCall).toEqual([
+                '⚠️ Invalid environment variables:',
+                {
+                    REQUIRED_VAR_1: 'Expected string',
+                    REQUIRED_VAR_2: 'Expected string',
+                },
+            ])
         })
     })
 })
