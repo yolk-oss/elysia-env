@@ -1,9 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { env } from '@yolk-oss/elysia-env'
 
-const app = new Elysia({
-    prefix: '/good',
-})
+new Elysia()
     .use(
         env({
             TOKEN: t.String({
