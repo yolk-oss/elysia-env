@@ -1,3 +1,22 @@
+# 2.0.0 - 18 Jan 2025
+
+Improvement:
+
+-   Fix Elysia.js >= 1.2.0 incompatible types 🪄
+-   New options for `env`
+    -   `envSource`
+    -   `onError`
+    -   `onSuccess`
+
+Documentation:
+
+-   Update readme to contain details about new options
+
+Chore:
+
+-   Update dependencies
+-   Upgrade eslint
+
 # 1.0.2 - 26 Mar 2024
 
 Improvement:
