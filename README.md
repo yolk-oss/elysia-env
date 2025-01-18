@@ -6,15 +6,30 @@
 [![bundle][bundle-src]][bundle-href]
 [![License][license-src]][license-href]
 
-env plugin for [Elysia.js](https://elysiajs.com)
+A plugin for [Elysia.js](https://elysiajs.com) to validate environment variables and inject them into your application.
+
+## Table of Contents
+
+-   [Installation](#installation)
+-   [Basic Usage](#basic-usage)
+-   [Features](#features)
+    -   [Custom Environment Sources](#custom-environment-sources)
+    -   [Error Handling](#error-handling)
+    -   [Success Callback](#success-callback)
+-   [License](#license)
 
 ## Installation
+
+To install `@yolk-oss/elysia-env` with Bun, run the following command:
 
 ```bash
 bun add @yolk-oss/elysia-env
 ```
 
-## Usage
+## Basic Usage
+
+The `@yolk-oss/elysia-env` plugin provides a way to validate and inject environment variables into your Elysia.js application.
+You define a schema for the environment variables using TypeBox, and the plugin will validate them, inject them, and handle errors based on your preferences.
 
 ```ts
 import { Elysia, t } from 'elysia'
@@ -37,6 +52,49 @@ console.log(`Listening on http://${app.server!.hostname}:${app.server!.port}`)
 ```
 
 Checkout the [examples](./examples) and [tests](./tests) folders on github.
+
+## Features
+
+### Custome Environment Sources
+
+You can specify a custom source for the environment variables.
+By default, the plugin uses process.env, but you can use alternative sources like secret managers, custom storage, etc.
+
+```ts
+env(schema, {
+    envSource: {
+        API_KEY: 'custom-api-key',
+        DB_URL: 'custom-db-url',
+    },
+})
+```
+
+### Error Handling
+
+You can control how the plugin handles validation errors through the `onError` option:
+
+-   'exit': Exits the process with an error code 1 (default).
+-   'warn': Logs a warning message but continues running the app.
+-   'silent': Continues without logging anything.
+-   Function: You can pass a custom error handler function.
+
+```ts
+env(schema, {
+    onError: 'warn', // Logs a warning and continues
+})
+```
+
+### Success Callback
+
+You can define a callback function that is executed when the environment variables pass validation successfully.
+
+```ts
+env(schema, {
+    onSuccess: (env) => {
+        console.log('Successfully loaded environment variables:', env)
+    },
+})
+```
 
 ## License
 
