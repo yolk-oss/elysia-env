@@ -3,14 +3,50 @@ import type { TProperties } from '@sinclair/typebox'
 import { TypeCompiler } from '@sinclair/typebox/compiler'
 import { Value } from '@sinclair/typebox/value'
 
+export type EnvOptions = {
+    /**
+     * Custom environment variables source to use instead of process.env.
+     * This allows fetching environment variables from alternative sources like
+     * secret managers, configuration services, or custom storage.
+     *
+     * @example
+     * // Using process.env (default)
+     * env(schema)
+     *
+     * @example
+     * // Using custom environment object
+     * env(schema, {
+     *   envSource: { API_KEY: 'custom-key', DB_URL: 'custom-url' }
+     * })
+     *
+     * @example
+     * // Using async values from a secret manager
+     * const secrets = await vault.getSecrets()
+     * env(schema, { envSource: secrets })
+     *
+     * @example
+     * // Combining multiple sources
+     * env(schema, {
+     *   envSource: {
+     *     ...process.env,
+     *     ...await getSecrets(),
+     *     ...overrides
+     *   }
+     * })
+     *
+     * @default process.env
+     */
+    envSource?: NodeJS.ProcessEnv
+}
+
 export const env = <TEnv extends TProperties = NonNullable<unknown>>(
     variables: TEnv,
+    options: EnvOptions = {},
 ) =>
     new Elysia({
         name: '@yolk-oss/elysia-env',
     }).decorate(() => {
-        // TODO: allow to pass env to take data from?
-        const runtimeEnv = process.env
+        const { envSource = process.env } = options
 
         const EnvVariableSchema = t.Object(variables)
         const Compiler = TypeCompiler.Compile(EnvVariableSchema)
@@ -18,7 +54,7 @@ export const env = <TEnv extends TProperties = NonNullable<unknown>>(
         const preparedVariables = Value.Parse(
             ['Clone', 'Clean', 'Default', 'Decode', 'Convert'],
             EnvVariableSchema,
-            runtimeEnv,
+            envSource,
         )
 
         if (!Compiler.Check(preparedVariables)) {
