@@ -3,7 +3,7 @@ import type { TProperties } from '@sinclair/typebox'
 import { TypeCompiler } from '@sinclair/typebox/compiler'
 import { Value } from '@sinclair/typebox/value'
 
-export type EnvOptions = {
+export type EnvOptions<T extends TProperties> = {
     /**
      * Custom environment variables source to use instead of process.env.
      * This allows fetching environment variables from alternative sources like
@@ -53,16 +53,23 @@ export type EnvOptions = {
         | 'warn'
         | 'silent'
         | ((errors: Record<string, string>) => void)
+
+    /**
+     * Callback executed when environment variables are successfully validated.
+     *
+     * @param env
+     */
+    onSuccess?: (env: Static<ReturnType<typeof t.Object<T>>>) => void
 }
 
 export const env = <TEnv extends TProperties = NonNullable<unknown>>(
     variables: TEnv,
-    options: EnvOptions = {},
+    options: EnvOptions<TEnv> = {},
 ) =>
     new Elysia({
         name: '@yolk-oss/elysia-env',
     }).decorate(() => {
-        const { envSource = process.env, onError = 'exit' } = options
+        const { envSource = process.env, onError = 'exit', onSuccess } = options
 
         const EnvVariableSchema = t.Object(variables)
         const Compiler = TypeCompiler.Compile(EnvVariableSchema)
@@ -106,6 +113,8 @@ export const env = <TEnv extends TProperties = NonNullable<unknown>>(
                         process.exit(1)
                 }
             }
+        } else {
+            onSuccess?.(preparedVariables)
         }
 
         return {

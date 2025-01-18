@@ -1,6 +1,14 @@
 import { Elysia, t } from 'elysia'
 import { env } from '../src'
-import { describe, expect, it, spyOn, beforeEach, afterEach } from 'bun:test'
+import {
+    describe,
+    expect,
+    it,
+    spyOn,
+    beforeEach,
+    afterEach,
+    jest,
+} from 'bun:test'
 
 const req = (path: string) => new Request(`http://localhost${path}`)
 
@@ -485,6 +493,87 @@ describe('@yolk-oss/elysia-env', () => {
                     REQUIRED_VAR_2: 'Expected string',
                 },
             ])
+        })
+    })
+
+    describe('onSuccess', () => {
+        it('should invoke custom onSuccess handler on successful environment variable parsing', async () => {
+            const onSuccessSpy = jest.fn((envVariables) => {
+                console.log('onSuccess called with:', envVariables)
+            })
+
+            const app = new Elysia()
+                .use(
+                    env(
+                        {
+                            REQUIRED_VAR: t.String(),
+                        },
+                        {
+                            envSource: { REQUIRED_VAR: 'some-value' },
+                            onSuccess: onSuccessSpy,
+                        },
+                    ),
+                )
+                .get('/', ({ env }) => env)
+
+            await app.handle(req('/'))
+
+            expect(onSuccessSpy).toHaveBeenCalledWith({
+                REQUIRED_VAR: 'some-value',
+            })
+        })
+
+        it('should handle multiple successful variables and invoke onSuccess', async () => {
+            const onSuccessSpy = jest.fn((envVariables) => {
+                console.log('onSuccess called with:', envVariables)
+            })
+
+            const envSource = {
+                VAR_1: 'value1',
+                VAR_2: 'value2',
+            }
+
+            const app = new Elysia()
+                .use(
+                    env(
+                        {
+                            VAR_1: t.String(),
+                            VAR_2: t.String(),
+                        },
+                        {
+                            envSource,
+                            onSuccess: onSuccessSpy,
+                        },
+                    ),
+                )
+                .get('/', ({ env }) => env)
+
+            await app.handle(req('/'))
+
+            expect(onSuccessSpy).toHaveBeenCalledWith(envSource)
+        })
+
+        it('should not invoke onSuccess if variables are invalid', async () => {
+            const onSuccessSpy = jest.fn((envVariables) => {
+                console.log('onSuccess called with:', envVariables)
+            })
+
+            const app = new Elysia()
+                .use(
+                    env(
+                        {
+                            REQUIRED_VAR: t.String(),
+                        },
+                        {
+                            onSuccess: onSuccessSpy,
+                        },
+                    ),
+                )
+                .get('/', ({ env }) => env)
+
+            await app.handle(req('/'))
+
+            expect(onSuccessSpy).not.toHaveBeenCalled()
         })
     })
 })
