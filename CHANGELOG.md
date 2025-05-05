@@ -1,3 +1,19 @@
+# 3.0.0 - 18 Jan 2025
+
+Improvement:
+
+-   New option for `env`
+    -   `prefix`
+
+Documentation:
+
+-   Update readme to contain details about new option
+
+Chore :
+
+-   Update dependencies
+-   Update Bun lock file
+
 # 2.0.0 - 18 Jan 2025
 
 Improvement:

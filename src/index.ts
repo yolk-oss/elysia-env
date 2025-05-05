@@ -1,7 +1,7 @@
-import { Elysia, Static, t } from 'elysia'
 import type { TProperties } from '@sinclair/typebox'
 import { TypeCompiler } from '@sinclair/typebox/compiler'
 import { Value } from '@sinclair/typebox/value'
+import { Elysia, Static, t } from 'elysia'
 
 export type EnvOptions<T extends TProperties> = {
     /**
@@ -39,6 +39,17 @@ export type EnvOptions<T extends TProperties> = {
     envSource?: NodeJS.ProcessEnv
 
     /**
+     * Only load environment variables with this prefix.
+     * The prefix will be removed from the variable names.
+     *
+     * @example
+     * // With process.env = { APP_API_KEY: 'abc', APP_DEBUG: 'true', OTHER_VAR: '123' }
+     * env(schema, { prefix: 'APP_' })
+     * // Will only load { API_KEY: 'abc', DEBUG: 'true' }
+     */
+    prefix?: string
+
+    /**
      * Defines how to handle validation errors for environment variables.
      *
      * - 'exit': Exits process with error code 1 (default)
@@ -69,7 +80,28 @@ export const env = <TEnv extends TProperties = NonNullable<unknown>>(
     new Elysia({
         name: '@yolk-oss/elysia-env',
     }).decorate(() => {
-        const { envSource = process.env, onError = 'exit', onSuccess } = options
+        const {
+            envSource = process.env,
+            onError = 'exit',
+            onSuccess,
+            prefix,
+        } = options
+
+        let processedEnvSource = envSource
+
+        if (prefix) {
+            processedEnvSource = Object.entries(envSource).reduce(
+                (acc, [key, value]) => {
+                    if (key.startsWith(prefix)) {
+                        // Remove prefix and add to processed env
+                        const newKey = key.substring(prefix.length)
+                        acc[newKey] = value
+                    }
+                    return acc
+                },
+                {} as NodeJS.ProcessEnv,
+            )
+        }
 
         const EnvVariableSchema = t.Object(variables)
         const Compiler = TypeCompiler.Compile(EnvVariableSchema)
@@ -77,7 +109,7 @@ export const env = <TEnv extends TProperties = NonNullable<unknown>>(
         const preparedVariables = Value.Parse(
             ['Clone', 'Clean', 'Default', 'Decode', 'Convert'],
             EnvVariableSchema,
-            envSource,
+            processedEnvSource,
         )
 
         if (!Compiler.Check(preparedVariables)) {

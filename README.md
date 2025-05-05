@@ -14,6 +14,7 @@ A plugin for [Elysia.js](https://elysiajs.com) to validate environment variables
 -   [Basic Usage](#basic-usage)
 -   [Features](#features)
     -   [Custom Environment Sources](#custom-environment-sources)
+    -   [Prefix](#prefix)
     -   [Error Handling](#error-handling)
     -   [Success Callback](#success-callback)
 -   [License](#license)
@@ -55,7 +56,7 @@ Checkout the [examples](./examples) and [tests](./tests) folders on github.
 
 ## Features
 
-### Custome Environment Sources
+### Custom Environment Sources
 
 You can specify a custom source for the environment variables.
 By default, the plugin uses process.env, but you can use alternative sources like secret managers, custom storage, etc.
@@ -68,6 +69,20 @@ env(schema, {
     },
 })
 ```
+
+### Prefix
+
+You can specify a prefix for the environment variables.
+This will load only variables that start with the specified prefix.
+
+```ts
+env(schema, {
+    prefix: 'MY_APP_', // Variables must start with MY_APP_
+})
+```
+
+> [!WARNING]
+> Variables with default values will be available even if they don't start with the prefix.
 
 ### Error Handling
 

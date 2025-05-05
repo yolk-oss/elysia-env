@@ -1,14 +1,14 @@
-import { Elysia, t } from 'elysia'
-import { env } from '../src'
 import {
+    afterEach,
+    beforeEach,
     describe,
     expect,
     it,
-    spyOn,
-    beforeEach,
-    afterEach,
     jest,
+    spyOn,
 } from 'bun:test'
+import { Elysia, t } from 'elysia'
+import { env } from '../src'
 
 const req = (path: string) => new Request(`http://localhost${path}`)
 
@@ -574,6 +574,202 @@ describe('@yolk-oss/elysia-env', () => {
             await app.handle(req('/'))
 
             expect(onSuccessSpy).not.toHaveBeenCalled()
+        })
+    })
+
+    describe('prefix', () => {
+        it('should filter environment variables by prefix', async () => {
+            // Mock environment with prefixed variables
+            const mockEnv = {
+                APP_API_KEY: 'test-key',
+                APP_DEBUG: 'true',
+                OTHER_VAR: 'should-be-ignored',
+            }
+
+            const app = new Elysia()
+                .use(
+                    env(
+                        {
+                            API_KEY: t.String(),
+                            DEBUG: t.Boolean(),
+                        },
+                        {
+                            envSource: mockEnv,
+                            prefix: 'APP_',
+                        },
+                    ),
+                )
+                .get('/', ({ env }) => env)
+
+            const response = await app
+                .handle(req('/'))
+                .then((res) => res.json())
+
+            expect(response).toEqual({
+                API_KEY: 'test-key',
+                DEBUG: true,
+            })
+
+            console.log({ response })
+            // Verify that non-prefixed variables are excluded
+            expect(response.OTHER_VAR).toBeUndefined()
+        })
+
+        it('should handle empty result when no variables match prefix', async () => {
+            const mockEnv = {
+                PROD_API_KEY: 'test-key',
+                PROD_DEBUG: 'true',
+            }
+
+            const app = new Elysia()
+                .use(
+                    env(
+                        {
+                            API_KEY: t.String({ default: 'default-key' }),
+                            DEBUG: t.Boolean({ default: false }),
+                        },
+                        {
+                            envSource: mockEnv,
+                            prefix: 'APP_',
+                        },
+                    ),
+                )
+                .get('/', ({ env }) => env)
+
+            const response = await app
+                .handle(req('/'))
+                .then((res) => res.json())
+
+            // Should use default values since no variables match the prefix
+            expect(response).toEqual({
+                API_KEY: 'default-key',
+                DEBUG: false,
+            })
+        })
+
+        it('should work with process.env when no envSource is provided', async () => {
+            // Save original process.env
+            const originalEnv = process.env
+
+            try {
+                // Mock process.env
+                process.env = {
+                    ...process.env,
+                    TEST_API_KEY: 'process-key',
+                    TEST_DEBUG: 'true',
+                    SOME_OTHER_VAR: 'value',
+                } as any
+
+                const app = new Elysia()
+                    .use(
+                        env(
+                            {
+                                API_KEY: t.String(),
+                                DEBUG: t.Boolean(),
+                            },
+                            { prefix: 'TEST_' },
+                        ),
+                    )
+                    .get('/', ({ env }) => env)
+
+                const response = await app
+                    .handle(req('/'))
+                    .then((res) => res.json())
+
+                // Should use process.env and filter by prefix
+                expect(response).toEqual({
+                    API_KEY: 'process-key',
+                    DEBUG: true,
+                })
+                expect(response.SOME_OTHER_VAR).toBeUndefined()
+            } finally {
+                // Restore original process.env
+                process.env = originalEnv
+            }
+        })
+
+        it('should handle case-sensitive prefixes correctly', async () => {
+            const mockEnv = {
+                app_api_key: 'lowercase-key',
+                APP_API_KEY: 'uppercase-key',
+                App_Debug: 'mixed-case',
+            }
+
+            const app = new Elysia()
+                .use(
+                    env(
+                        {
+                            API_KEY: t.String(),
+                            Debug: t.String(),
+                            api_key: t.String(),
+                        },
+                        {
+                            envSource: mockEnv,
+                            prefix: 'APP_',
+                        },
+                    ),
+                )
+                .get('/', ({ env }) => env)
+
+            const response = await app
+                .handle(req('/'))
+                .then((res) => res.json())
+
+            // Should only match the exact case
+            expect(response.API_KEY).toBe('uppercase-key')
+            expect(response.api_key).toBeUndefined()
+
+            // Test with mixed case prefix
+            const appMixed = new Elysia()
+                .use(
+                    env(
+                        {
+                            Debug: t.String(),
+                        },
+                        {
+                            envSource: mockEnv,
+                            prefix: 'App_',
+                        },
+                    ),
+                )
+                .get('/', ({ env }) => env)
+
+            const responseMixed = await appMixed
+                .handle(req('/'))
+                .then((res) => res.json())
+
+            // Should match the mixed case
+            expect(responseMixed.Debug).toBe('mixed-case')
+        })
+
+        it('should combine prefix with other options like onError', async () => {
+            const mockEnv = {
+                // No matching prefixed variables
+            }
+
+            const errorHandlerSpy = jest.fn()
+
+            const app = new Elysia()
+                .use(
+                    env(
+                        {
+                            REQUIRED_VAR: t.String(),
+                        },
+                        {
+                            envSource: mockEnv,
+                            prefix: 'APP_',
+                            onError: errorHandlerSpy,
+                        },
+                    ),
+                )
+                .get('/', ({ env }) => env)
+
+            await app.handle(req('/'))
+
+            // Should call error handler with the unprefixed variable name
+            expect(errorHandlerSpy).toHaveBeenCalledWith({
+                REQUIRED_VAR: expect.any(String),
+            })
         })
     })
 })
