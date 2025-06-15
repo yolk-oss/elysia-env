@@ -8,6 +8,9 @@
 
 A plugin for [Elysia.js](https://elysiajs.com) to validate environment variables and inject them into your application.
 
+> [!TIP]
+> Before using this plugin, consider using Elysia built-in `.env(t.Object({ ENV: t.String() }))` method for simple `.env` variable validation
+
 ## Table of Contents
 
 -   [Installation](#installation)
