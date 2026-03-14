@@ -1,3 +1,9 @@
+# 3.0.1 - 14 Mar 2026
+
+Security:
+
+-   Bump `elysia` to `1.4.26` to address a vulnerable dependency version
+
 # 3.0.0 - 18 Jan 2025
 
 Improvement:

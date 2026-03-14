@@ -1,5 +1,4 @@
-import { env } from '@yolk-oss/elysia-env'
-import { Elysia, t } from 'elysia'
+import { Elysia, env, t } from 'elysia'
 
 new Elysia()
     .use(
